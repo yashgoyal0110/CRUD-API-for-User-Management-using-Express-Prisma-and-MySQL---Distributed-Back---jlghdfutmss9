@@ -75,6 +75,7 @@ app.post("/api/auth/login", async (req, res) => {
         error: "Invalid credentials",
       });
     }
+    console.log(process.env.JWT_SECRET);
     return res.status(200).json({
       userdata: {
         id: existingUser.id,
