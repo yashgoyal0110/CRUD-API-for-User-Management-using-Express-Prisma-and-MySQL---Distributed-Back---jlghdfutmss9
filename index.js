@@ -76,16 +76,17 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
     console.log(process.env.JWT_SECRET);
+    const token = jwt.sign(
+      { email: existingUser.email },
+      process.env.JWT_SECRET
+    )
     return res.status(200).json({
       userdata: {
         id: existingUser.id,
         name: existingUser.name,
         email: existingUser.email,
       },
-      accesstoken: jwt.sign(
-        { email: existingUser.email },
-        process.env.JWT_SECRET
-      ),
+      accesstoken: token
     });
   } catch (err) {
     console.error("Error during login:", err.message);
