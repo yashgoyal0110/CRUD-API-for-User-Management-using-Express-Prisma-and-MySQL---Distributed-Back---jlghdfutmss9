@@ -10,8 +10,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-let bcryptKey =
-  "68d97a7b7965450091cd86a139a66caaca857c05511860b11b0064e388ba105328de791c8336dd7561f52ea7f2fa64f2d09810cfea12978b571cdceab05270b";
+
   app.get('/', (req, res)=>{
     console.log("getApi");
   })
@@ -28,7 +27,7 @@ app.post("/api/auth/signup", async (req, res) => {
       error: "Password is required",
     });
   }
-  let existingUser = await prisma.User.findUnique({
+  let existingUser = await prisma.user.findUnique({
     where: { email },
   });
   if (existingUser) {
@@ -56,13 +55,14 @@ catch(err){
 });
 
 app.post("/api/auth/login", async (req, res) => {
+  try{
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({
       error: "Email and password are required",
     });
   }
-  let existingUser = await prisma.User.findUnique({
+  let existingUser = await prisma.user.findUnique({
     where: { email },
   });
   if (!existingUser) {
@@ -85,8 +85,13 @@ app.post("/api/auth/login", async (req, res) => {
       name: existingUser.name,
       email: existingUser.email,
     },
-    accesstoken: jwt.sign(existingUser.email, bcryptKey),
+    accesstoken: jwt.sign({email: existingUser.email}, process.env.JWT_SECRET),
   });
+}
+catch(err){
+  console.log(err.message);
+  return res.status(500).json({"err": err.message})
+}
 });
 
 const PORT = process.env.PORT || 3000;
