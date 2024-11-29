@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const bcrypt = require("bcrypt");
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const jwt = require('jsonwebtoken')
+const jwt = require("jsonwebtoken");
 
 dotenv.config();
 
@@ -12,17 +12,21 @@ const app = express();
 app.use(express.json());
 let bcryptKey =
   "68d97a7b7965450091cd86a139a66caaca857c05511860b11b0064e388ba105328de791c8336dd7561f52ea7f2fa64f2d09810cfea12978b571cdceab05270b";
+  app.get('/', (req, res)=>{
+    console.log("getApi");
+  })
 app.post("/api/auth/signup", async (req, res) => {
+  try{
   const { name, email, password } = req.body;
-  if(!email){
+  if (!email) {
     return res.status(400).json({
-      "error" : "Email is required"
-    })
+      error: "Email is required",
+    });
   }
-  if(!password){
+  if (!password) {
     return res.status(400).json({
-      "error" : "Password is required"
-    })
+      error: "Password is required",
+    });
   }
   let existingUser = await prisma.User.findUnique({
     where: { email },
@@ -45,34 +49,45 @@ app.post("/api/auth/signup", async (req, res) => {
     message: "User created successfully",
     userId: createdUser.id,
   });
+}
+catch(err){
+  console.log(err.message);
+}
 });
 
-app.post('/api/auth/login', async(req, res)=>{
-  const {email, password} = req.body;
-  if(!email || !password){
+app.post("/api/auth/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
     return res.status(400).json({
-      "error": "Email and password are required"
-    })
+      error: "Email and password are required",
+    });
   }
   let existingUser = await prisma.User.findUnique({
     where: { email },
   });
-  if(!existingUser){
+  if (!existingUser) {
     return res.status(404).json({
-      "error": "User not found"
-    })
+      error: "User not found",
+    });
   }
-  let userPassword = existingUser.password
-  let matchedPass = await bcrypt.compare(password, userPassword)
-  if(!matchedPass){
+  let userPassword = existingUser.password;
+  console.log(userPassword);
+  let matchedPass = await bcrypt.compare(password, userPassword);
+  console.log(matchedPass);
+  if (!matchedPass) {
     return res.status(401).json({
-      "error": "Invalid credentials"
-    })
+      error: "Invalid credentials"
+    });
   }
   return res.status(200).json({
-    userdata: {"id" : existingUser.id, "name" : existingUser.name, "email" : existingUser.email}, accesstoken: jwt.sign(existingUser, bcryptKey)
-  })
-})
+    userdata: {
+      id: existingUser.id,
+      name: existingUser.name,
+      email: existingUser.email,
+    },
+    accesstoken: jwt.sign(existingUser.email, bcryptKey),
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

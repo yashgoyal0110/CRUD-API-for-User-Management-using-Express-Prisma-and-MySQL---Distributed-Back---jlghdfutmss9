@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://root:Doraemon@69@localhost:3306/userdb"
+  url      = env("DATABASE_URL")
 }
 
 model User {
