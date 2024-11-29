@@ -69,9 +69,8 @@ app.post("/api/auth/login", async (req, res) => {
         error: "User not found",
       });
     }
-    const userPassword = existingUser.password;
-    const matchedPass = await bcrypt.compare(password, userPassword);
-    if (matchedPass === false) {
+    const matchedPass = await bcrypt.compare(password, existingUser.password);
+    if (!matchedPass) {
       return res.status(401).json({
         error: "Invalid credentials",
       });
@@ -88,6 +87,7 @@ app.post("/api/auth/login", async (req, res) => {
       ),
     });
   } catch (err) {
+    console.error("Error during login:", err.message);
     return res.status(500).json({ err: err.message });
   }
 });
