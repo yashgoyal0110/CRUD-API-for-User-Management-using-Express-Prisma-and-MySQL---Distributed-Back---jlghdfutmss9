@@ -77,7 +77,7 @@ app.post("/api/auth/login", async (req, res) => {
     }
     console.log(process.env.JWT_SECRET);
     const token = jwt.sign(
-      { email: existingUser.email },
+      { userId: existingUser.id },
       process.env.JWT_SECRET
     )
     return res.status(200).json({
